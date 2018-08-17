@@ -140,16 +140,22 @@ switch filetype
         else
             data = segRead('data', 'b') .* info.header.bitVolts;
         end
-        
-        if nargout>1 % do not create timestamp arrays unless they are requested
-            timestamps = nan(size(data));
-            current_sample = 0;
-            for record = 1:length(info.ts)
-                timestamps(current_sample+1:current_sample+info.nsamples(record)) = info.ts(record):info.ts(record)+info.nsamples(record)-1;
-                current_sample = current_sample + info.nsamples(record);
-            end
-            timestamps = timestamps./info.header.sampleRate;
+        if nargout>1
+        timestamps = info.ts/info.header.sampleRate;
+        if info.nsamples(end) < info.nsamples(end-1)
+           missing =  info.nsamples(end-1) - info.nsamples(end);
+           data(end-missing:end)=nan;
         end
+        end
+%         if nargout>2 % do not create timestamp arrays unless they are requested
+%             timestamps = nan(size(data));
+%             current_sample = 0;
+%             for record = 1:length(info.ts)
+%                 timestamps(current_sample+1:current_sample+info.nsamples(record)) = info.ts(record):info.ts(record)+info.nsamples(record)-1;
+%                 current_sample = current_sample + info.nsamples(record);
+%             end
+%             timestamps = timestamps./info.header.sampleRate;
+%         end
     case '.spikes'
         timestamps = segRead('timestamps')./info.header.sampleRate;
         info.source = segRead('source');
